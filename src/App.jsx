@@ -1,56 +1,50 @@
 import React, { Component } from 'react';
 
-import { createStore } from 'redux';
-/*
-import { createStore as initialCreateStore, compose } from 'redux';
-*/
+import { Route, Router } from 'react-router';
+
+import { reduxRouteComponent, routerStateReducer } from 'redux-react-router';
+
+import { createStore, combineReducers, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
-import { devTools, persistState } from 'redux-devtools';
-import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
-import todoReducer from './stores/TodoReducer.js';
-import AppView from './components/AppView.jsx';
-//import { List } from 'immutable';
+import reducer from './redux/Reducer.js';
 
-//let initialState = new List();
+import AppView from './containers/AppView.jsx';
+import Login from './containers/Login.jsx';
 
-//const reducer = combineReducers(reducers);
-/*let createStore = compose(
-    devTools(),
-    persistState(window.location.href.match(/[?&]debug_session=([^&]+)\b/)),
-    initialCreateStore
-  );*/
+const combinedReducer = combineReducers({
+  router: routerStateReducer,
+  reducer
+});
 
-const store = createStore(todoReducer);//, initialState);
+import parseComMiddleware from './redux/ParseComMiddleware.js';
+const createStoreWithMiddleware = applyMiddleware(
+  parseComMiddleware,
+)(createStore);
 
-// Log the initial state
-console.log('store: ', store.getState());
-
-// Every time the state changes, log it
-/*let unsubscribe = store.subscribe(() =>
-  console.log('store: ', store.getState())
-);*/
-
-//unsubscribe();
+const store = createStoreWithMiddleware(combinedReducer);
 
 export default class App extends Component {
   render() {
     return (
       <div>
         <Provider store={store}>
-          {() => <AppView />}
+          { () => <AppView /> }
         </Provider>
-
-
       </div>
-
     );
   }
 }
 
+const requireAuth = (nextState, replaceState) => {
+  if (store.user.session) {
+    replaceState({ nextPathname: nextState.location.pathname }, '/login');
+  }
+};
 
-        /*
+React.render(
+  <Router>
+    <Route name="app" path="/" component={App} onEnter={requireAuth}/>
+    <Route name="login" path="/login" component={Login}/>
+  </Router>, document.querySelector('.app')
+);
 
-        <DebugPanel top right bottom>
-          <DevTools store={store} monitor={LogMonitor} />
-        </DebugPanel>
-      */

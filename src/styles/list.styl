@@ -1,3 +1,4 @@
+@import "defines.styl"
 
 .body-layer
   heigth: 100%
@@ -32,24 +33,21 @@
     text-transform: uppercase;
     font-size: font-size-header;
 
-  .todo-list-item
-    //display: inline-block
-    //outline: solid #000 1px
+  .todo__list-item
     heignt: 30px
 
-  .todo-list-item:hover
-    background: rgba(0, 140, 207, 0.1)
+    &:hover
+      background: rgba(0, 140, 207, 0.1)
 
-  .todo-remove-button-disabled
-    @extend .remove-button
+    &__remove-button
+      @extend .remove-button
+      &:hover
+        color: red
 
-  .todo-remove-button
-    @extend .remove-button
+    &__remove-button--disabled
+      @extend .remove-button
 
-  .todo-remove-button:hover
-    color: red
-
-  .todo-text-disabled
+  .todo__text-disabled
     @extend .text-todo
     
   .todo-text
@@ -77,11 +75,7 @@
   font-weight: 600
 
   .todo-edit
-    display: inline-block
-    font-size: font-size-small
-    width: 420px
-    heignt: 21px
-    margin: 2px
+    @extends .edit-style
 
   .add-todo-button
     display: inline-block
@@ -92,7 +86,7 @@
     font-weight: 600
     text-align: center
     outline: solid gray 1px
-    
-  .add-todo-button:hover
-    cursor: pointer
-    outline: solid gray 2px
+
+    &:hover
+      cursor: pointer
+      outline: solid gray 2px

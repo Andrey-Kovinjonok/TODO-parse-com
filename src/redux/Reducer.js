@@ -1,38 +1,13 @@
 import { CREATE_TODO, EDIT_TODO, DELETE_TODO } from './TodoActions.js';
-//import { List } from 'immutable';
 
-/*const initialState = {
-  notes: [],
-  activeNote: {}
-};*/
+import { SIGN_IN } from './ParseComActions.js';
 
 const initialState = {
   todos: [],
-  lastIndex: -1
+  lastIndex: -1,
+  users: [],
+  user: {}
 };
-
-/*
-const initialState = new List();
-
-export default function todoReducer(state = initialState, action) {
-  console.log('todoReducer:', state, action);
-  switch (action.type) {
-    case CREATE_TODO:
-      return state.concat(action.text);
-
-    case EDIT_TODO:
-      return state.set(action.id, action.text);
-
-    case DELETE_TODO:
-      return state.delete(action.id);
-
-    default:
-    console.log('--DEFAULT ACTION:', state);
-      return state;
-  }
-}*/
-
-
 
 export default function todoReducer(state = initialState, action) {
   
@@ -40,6 +15,7 @@ export default function todoReducer(state = initialState, action) {
   switch (action.type) {
     case CREATE_TODO:
       return {
+        ...state,
         todos: [
           ...state.todos,
           {
@@ -53,20 +29,32 @@ export default function todoReducer(state = initialState, action) {
       };
 
     case EDIT_TODO:
-      let todos = state.map(todo =>
+      let todos = state.todos.map(todo =>
         (todo.index === action.index) ? { ...todo, text: action.text } : todo
       );
       return {
-        todos: todos,
-        lastIndex: state.lastIndex
+        ...state,
+        ['todos']: todos,
+        ['lastIndex']: state.lastIndex
       };
 
     case DELETE_TODO:
       let arr = state.todos.filter(todo => todo.index !== action.index);
       return {
-        todos: arr,
-        lastIndex: state.lastIndex
+        ...state,
+        ['todos']: arr,
+        ['lastIndex']: state.lastIndex
       };
+
+    case SIGN_IN:
+      return {
+        ...state,
+        users: [
+          ...state.users,
+          action.user
+        ]
+      };
+
 
     default:
       console.log('--DEFAULT ACTION:', state);

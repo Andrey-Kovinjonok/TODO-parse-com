@@ -22,8 +22,13 @@ module.exports = {
     new webpack.NoErrorsPlugin()
   ],
   resolve: {
-    extensions: [ '', '.js' ]
+    extensions: [ '', '.js', 'json' ]
   },
+
+  /*externals: {
+    Config: apiConfig
+  },*/
+
   module: {
     loaders: [{
       test: /\.styl$/,
@@ -33,6 +38,9 @@ module.exports = {
       test: /\.jsx?$/,
       loaders: ['babel?stage=0'],
       include: path.join(__dirname, 'src')
+    }, {
+      test: /\.json/,
+      loader: 'file?limit=10000' + '&name=[path]/[name].[ext]'
     }]
   }
 };

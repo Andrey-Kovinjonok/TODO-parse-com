@@ -1,15 +1,15 @@
 import React, { Component, PropTypes } from 'react';
 
-import TodoItem from './TodoItem.jsx';
-import TodoEditor from './TodoEditor.jsx';
+import TodoItem from './../components/TodoItem.jsx';
+import TodoEditor from './../components/TodoEditor.jsx';
 
-import * as todoActions from './../stores/TodoActions.js';
+import * as todoActions from './../redux/TodoActions.js';
 //import StoreExports from './../stores/TodoStore.jsx';
 //let { TodoStore, Actions } = StoreExports;
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
-//@connect(state => ({ todos: state.todos }))
+@connect(state => ({ todoState: state.todos }))
 export default class AppView extends Component {
 
   constructor(props, context) {
@@ -50,8 +50,6 @@ export default class AppView extends Component {
 
     let actions = bindActionCreators(todoActions, dispatch);
 
-
-
     let editTodo;
     if (editTodo === undefined) {
       editTodo = { dbKey: -1, text: '', index: -1 };
@@ -87,11 +85,3 @@ export default class AppView extends Component {
   }
 }
 
-function select(state) {
-  console.log("state=", state);
-  return {
-    todoState: state
-  };
-}
-
-export default connect(select)(AppView);
