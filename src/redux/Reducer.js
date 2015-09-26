@@ -1,16 +1,16 @@
 import { CREATE_TODO, EDIT_TODO, DELETE_TODO } from './TodoActions.js';
 
-import { SIGN_IN } from './ParseComActions.js';
+import { ADD_USERS, LOG_IN, LOG_OUT } from './ParseComActions.js';
 
 const initialState = {
   todos: [],
   lastIndex: -1,
-  users: [],
-  user: {}
+  users: []
+  //user: {}
 };
 
 export default function todoReducer(state = initialState, action) {
-  
+
   console.log('todoReducer:', state, action);
   switch (action.type) {
     case CREATE_TODO:
@@ -46,15 +46,29 @@ export default function todoReducer(state = initialState, action) {
         ['lastIndex']: state.lastIndex
       };
 
-    case SIGN_IN:
-      return {
+    case ADD_USERS:
+      console.log(action);
+      let d = {
         ...state,
         users: [
           ...state.users,
-          action.user
+          ...action.users
         ]
       };
+      console.log(d);
+      return d;
 
+    case LOG_IN:
+      return {
+        ...state,
+        user: action.userData
+      };
+
+    case LOG_OUT:
+      return {
+        ...state,
+        user: undefined
+      };
 
     default:
       console.log('--DEFAULT ACTION:', state);

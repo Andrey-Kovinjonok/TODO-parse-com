@@ -7,10 +7,12 @@ import { bindActionCreators } from 'redux';
 
 import { connect } from 'react-redux';
 
-import parseComActions from './../redux/ParseComActions.js';
+import { Link } from 'react-router';
+
+import * as parseComActions from './../redux/ParseComActions.js';
 
 @connect(
-  state => ({ users: state.users }),
+  state => ({ users: state.users, user: state.user }),
   dispatch => bindActionCreators(parseComActions, dispatch)
 )
 export default class Login extends Component {
@@ -18,34 +20,49 @@ export default class Login extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isUnknownUser: true
+      isUnknownUser: true,
+      typedUser: ''
     };
   }
 
   static propTypes = {
-    user: PropTypes.object
+    users: PropTypes.array,
+    user: PropTypes.object,
+    dispatch: PropTypes.object,
+    signUp: PropTypes.func,
+    login: PropTypes.func,
+    logout: PropTypes.func
   }
 
-  /*static fetchData(store) {
-    if (!isAuthLoaded(store.getState())) {
-      return store.dispatch(loadAuth());
-    }
-  }*/
+  handleSignUp() {
+    let { signUp } = this.props; //eslint-disable-line
+    const username = this.refs.username.getDOMNode().value;
+    const password = this.refs.password.getDOMNode().value || '';
+    signUp({ username, password});
+  }
 
-  handleSubmit(event) {
-    event.preventDefault();
-    // need for getDOMNode() call going away in React 0.14
-    //const input = this.refs.username.getDOMNode();
-    //this.props.login(input.value);
-    //input.value = '';
+  handleLogIn() {
+    let { login } = this.props; //eslint-disable-line
+    const username = this.refs.username.getDOMNode().value;
+    const password = this.refs.password.getDOMNode().value || '';
+    login({ username, password });
+  }
+
+  handleLogOut() {
+    let { user, logout } = this.props;
+    logout(user.sessionToken);
   }
 
   handleInputUser(event) {
     event.preventDefault();
-    let { dispatch, users } = this.props;
+    let { users } = this.props;
     let nameOfUser = event.target.value;
-    let filteredUsers = users.filter(user => (user === nameOfUser));
-    if (filteredUser.length === 0) {
+    let filteredUsers = users.filter(user =>
+      (user.attributes.username === nameOfUser)
+    );
+
+    this.setState({ typedUser: nameOfUser });
+    if (filteredUsers.length === 0) {
       this.setState({ isUnknownUser: true });
     } else {
       this.setState({ isUnknownUser: false });
@@ -53,37 +70,55 @@ export default class Login extends Component {
   }
 
   render() {
-    const {user, logout} = this.props;
+    const { user } = this.props;
+    const { isUnknownUser, typedUser } = this.state;
+
+    const username = typedUser || '';
+    const notHasUsername = (username.trim().length === 0);
+
     return (
-      <div className={ styles.login + ' container' }>
+      <div className={'login container' }>
 
         <h1>Login</h1>
 
         { !user &&
-        <div>
-          <form className="login-form" onSubmit={::this.handleSubmit}>
-            <input type="text"
-                   placeholder="username"
-                   onChange={::this.handleInputUser} />
-            <button className="btn" onClick={::this.handleSubmit}>
-              Sign Up
-            </button>
+        <div className='login'>
 
-            <button className="btn" onClick={::this.handleSubmit}>
-              Log In
-            </button>
+          <input className='login--edit'
+                 type='text'
+                 placeholder='username'
+                 ref='username'
+                 onChange={::this.handleInputUser} />
 
-          </form>
-          <p>This will "log you in" as this user, storing the username in the session of the API server.</p>
+          <input className='login--edit'
+                 type='text'
+                 placeholder='password'
+                 ref='password' />
+
+          <button className="btn"
+                  disabled={!isUnknownUser || notHasUsername}
+                  onClick={::this.handleSignUp}>
+            Sign Up
+          </button>
+
+          <button className="btn"
+                  disabled={isUnknownUser || notHasUsername}
+                  onClick={::this.handleLogIn}>
+            Log In
+          </button>
+
         </div>
         }
 
         { user &&
         <div>
-          <p>You are currently logged in as {user.name}.</p>
+          <p>You are currently logged in as {user.username}.</p>
           <div>
-            <button className="btn btn-danger" onClick={logout}><i className="fa fa-sign-out"/>{' '}Log Out</button>
+            <button className='btn btn-danger' onClick={::this.handleLogOut}>
+              Log Out
+            </button>
           </div>
+          <Link to={'/'}> TODO </Link>
         </div>
         }
       </div>

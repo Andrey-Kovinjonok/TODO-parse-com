@@ -6,8 +6,14 @@ export default store => next => action => {
     let { promise, onSuccess, onFail } = action;
 
     return promise.then(
-      onSuccess,
-      onFail
+      (result) => {
+        let data = onSuccess(result);
+        return next({
+          ...action,
+          ...data
+        });
+      },
+      onFail || () => {}
     );
   }
 };

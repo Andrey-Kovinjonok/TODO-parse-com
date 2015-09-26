@@ -10,6 +10,10 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
 @connect(state => ({ todoState: state.todos }))
+@connect(
+  state => ({ todoState: state.todos }),
+  dispatch => bindActionCreators(todoActions, dispatch)
+)
 export default class AppView extends Component {
 
   constructor(props, context) {
@@ -25,10 +29,16 @@ export default class AppView extends Component {
     //friendsById: PropTypes.object.isRequired,
     dispatch: PropTypes.func.isRequired
   }*/
+  static propTypes = {
+    todoState: PropTypes.array,
+    dispatch: PropTypes.func,
+    createTodo: PropTypes.func
+  }
+
   componentDidMount() {
-    const { dispatch } = this.props;
+    const { createTodo } = this.props;
     console.log('appview componentDidMounted: ', this);
-    dispatch(todoActions.createTodo('firstTodo'));
+    createTodo('firstTodo');
     console.log('senden action');
   }
 
@@ -74,7 +84,7 @@ export default class AppView extends Component {
 
     return (
       <div className={'body-layer'}>
-        <div className={'todo-list'}>
+        <div className={'todo'}>
           <h1>My to do list:</h1>
           {items}
         </div>

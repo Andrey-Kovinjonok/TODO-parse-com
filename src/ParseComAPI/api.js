@@ -1,14 +1,12 @@
-//let config = require('!!json!./apiConfig.json');
 
-import { Parse } from 'node-parse-api';
-
-//let config = require('Config'); // externals.Config
+//import { Parse } from 'node-parse-api';
+import { Parse } from 'parse';
 
 let options = {
   /*app_id: config.appId,   //eslint-disable-line
   api_key: config.apiKey  //eslint-disable-line*/
-  app_id: 'G8uut7RIyYCwCgAS7tioU4eZRqzHltm1bReq4o8X', //eslint-disable-line
-  api_key: 'Lw3ZTfc2ER4kVh6zznDeXJfn1xphDFPgSYWGWVVz' //eslint-disable-line
+  appId: 'G8uut7RIyYCwCgAS7tioU4eZRqzHltm1bReq4o8X', //eslint-disable-line
+  apiKey: 'Lw3ZTfc2ER4kVh6zznDeXJfn1xphDFPgSYWGWVVz' //eslint-disable-line
 };
 
 let instance = null;
@@ -17,8 +15,10 @@ export default class ParseCOM {
   constructor() {
     if(!instance) {
       instance = this;
-      this.parseAPI = new Parse(options);
-      this.parseAPI.initialize();
+      // initialize api with options
+      Parse.initialize(options.appId, options.apiKey);
+      this.parseAPI = Parse;
+      (options);
     }
     return instance;
   }
@@ -31,43 +31,59 @@ export default class ParseCOM {
     return api;
   }
 
-  signIn(userData, success, fail = undefined) {
-    return this.parseAPI.insertUser(userData)
-    .then(
-      (result) => success(result),
-      (error) => fail(error)
-    );
+  signUp(userData) {
+    return new Promise((resolve, reject) => {
+      let user = new this.parseAPI.User();
+      user.set('username', userData.username);
+      user.set('password', userData.password);
+      user.signUp(null, {
+        success: (user) => (resolve(user)),
+        error: (user, error) => (reject({ user, error }))
+      });
+    });
   }
 
-  getUsers(success, fail = undefined) {
-    return this.parseAPI.find('')
-    .then(
-      (result) => success(result),
-      (error) => fail(error)
-    );
+  getUsers() {
+    return new Promise((resolve, reject) => {
+      let query = new this.parseAPI.Query(Parse.User);
+      query.find({
+        success: (users) => (resolve(users)),
+        error: (user, error) => (reject([]))
+      });
+    })
   }
 
-  login(user, pass, success, fail = undefined) {
-    return this.parseAPI.loginUser(user, pass)
-    .then(
-      (result) => success(result),
-      (error) => fail(error)
-    );
+  login(user, pass) {
+    let self = this;
+    return new Promise((resolve, reject) => {
+      return self.parseAPI.Parse.User.logIn(user, pass, {
+        success: (users) => (resolve(users)),
+        error: (user, error) => (reject([]))
+      })
+    })
   }
 
-  logout(sessionToken, success, fail = undefined) {
-    return this.parseAPI.logoutUser(sessionToken)
-    .then(
-      (result) => success(result),
-      (error) => fail(error)
-    );
+  logout(sessionToken) {
+    let self = this;
+    return new Promise((resolve, reject) => {
+      self.parseAPI.Parse.User.logOut()
+      .then( (res) => {
+        console.log("logout:", res);
+      });
+      let currUser = self.parseAPI.Parse.User.current();
+      if (!currUser) {
+        return resolve();
+      } else {
+        return reject();
+      }
+    });
   }
 
-  update(obj, field, value, success, fail = undefined) {
+  update(obj, field, value) {
     return this.parseAPI.update(obj, field, value)
     .then(
-      (result) => success(result),
-      (error) => fail(error)
+      success,
+      fail || () => {}
     );
   }
 }
