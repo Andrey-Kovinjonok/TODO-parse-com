@@ -1,4 +1,8 @@
-import { CREATE_TODO, EDIT_TODO, DELETE_TODO } from './TodoActions.js';
+import { CREATE_TODO
+        , SET_EDIT_TODO
+        , CHANGE_TODO
+        , LOAD_TODOS
+        , DELETE_TODO } from './TodoActions.js';
 
 import { ADD_USERS, LOG_IN, LOG_OUT } from './ParseComActions.js';
 
@@ -20,7 +24,6 @@ export default function todoReducer(state = initialState, action) {
           ...state.todos,
           {
             index: state.lastIndex + 1,
-            dbKey: action.dbKey,
             marked: false,
             text: action.text
           }
@@ -28,12 +31,20 @@ export default function todoReducer(state = initialState, action) {
         lastIndex: state.lastIndex + 1
       };
 
-    case EDIT_TODO:
+
+    case SET_EDIT_TODO:
+      return {
+        ...state,
+        ['editTodo']: action.editTodo
+      };
+
+    case CHANGE_TODO:
       let todos = state.todos.map(todo =>
         (todo.index === action.index) ? { ...todo, text: action.text } : todo
       );
       return {
         ...state,
+        ['editTodo']: undefined,
         ['todos']: todos,
         ['lastIndex']: state.lastIndex
       };
@@ -46,17 +57,25 @@ export default function todoReducer(state = initialState, action) {
         ['lastIndex']: state.lastIndex
       };
 
-    case ADD_USERS:
-      console.log(action);
+    case LOAD_TODOS:
       let d = {
+        //need save state, because we already have user's data
+        ...state,
+        todosObj: action.todosObj,
+        todos: action.todos,
+        ['lastIndex']: action.todos.length
+      };
+      console.log(d);
+      return d;
+
+    case ADD_USERS:
+      return {
         ...state,
         users: [
           ...state.users,
           ...action.users
         ]
       };
-      console.log(d);
-      return d;
 
     case LOG_IN:
       return {
@@ -71,40 +90,6 @@ export default function todoReducer(state = initialState, action) {
       };
 
     default:
-      console.log('--DEFAULT ACTION:', state);
       return state ? state : initialState;
   }
 }
-
-/*const initialTimeState = {};
-
-// The reducer is named with leading "_" to avoid having: state.time.time (time twice) when reading 
-// from state. So it's just a personal preference here and you may not need this depending on 
-// how your reducers are named and what properties they expose in Redux's store.
-export function todoReducer(state = initialTimeState, action) {
-  switch (action.type) {
-    case 'REQUEST':
-      return {
-        ...state,
-        frozen: true
-      };
-
-    case 'REQUEST_SUCCESS':
-      return {
-        ...state,
-        time: action.result.time,
-        frozen: false
-      };
-
-    case 'REQUEST_FAILURE':
-      // we could add an error message here, to be printed somewhere in our application
-      return {
-        ...state,
-        frozen: false
-      };
-
-    default:
-      return state;
-  }
-}*/
-

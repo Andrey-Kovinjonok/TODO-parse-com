@@ -35,14 +35,14 @@ export default class Login extends Component {
   }
 
   handleSignUp() {
-    let { signUp } = this.props; //eslint-disable-line
+    let { signUp } = this.props;
     const username = this.refs.username.getDOMNode().value;
     const password = this.refs.password.getDOMNode().value || '';
     signUp({ username, password});
   }
 
   handleLogIn() {
-    let { login } = this.props; //eslint-disable-line
+    let { login } = this.props;
     const username = this.refs.username.getDOMNode().value;
     const password = this.refs.password.getDOMNode().value || '';
     login({ username, password });

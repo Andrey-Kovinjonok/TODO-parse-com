@@ -2,9 +2,14 @@ import React, { Component, PropTypes } from 'react';
 
 import TextEdit from './TextEdit.jsx';
 
-//import StoreExports from './../stores/TodoStore.jsx';
-//let { TodoStore, Actions } = StoreExports;
+import * as todoActions from './../redux/TodoActions.js';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
 
+@connect(
+  state => ({ todos: state.todos }),
+  dispatch => bindActionCreators(todoActions, dispatch)
+)
 export default class TodoEditor extends Component {
 
   constructor(props, context) {
@@ -13,13 +18,13 @@ export default class TodoEditor extends Component {
 
     this.text = this.props.todo.text;
     this.state = {
-      isEdit: this.props.todo.dbKey !== -1
+      isEdit: this.text.length > 0
     };
   }
 
   static propTypes = {
-    //isEdit: React.PropTypes.bool.isRequired
-    actions: PropTypes.func.isRequired,
+    createTodo: PropTypes.func.isRequired,
+    changeTodo: PropTypes.func.isRequired,
     todo: PropTypes.object
   }
 
@@ -30,17 +35,16 @@ export default class TodoEditor extends Component {
   }
 
   handleSaveText(text) {
+    let { createTodo, changeTodo } = this.props;
     if (text.length !== 0) {
       if (this.state.isEdit) {
         let todo = {
-          //index: this.props.todo.index,
-          //dbKey: this.props.todo.dbKey,
           ...this.props.todo,
           text: text
         };
-        //this.props.editHandler(dbKey, todo);
+        changeTodo(todo);
       } else {
-        this.props.actions.createTodo(text);
+        createTodo(text);
       }
       this.text = '';
     }
@@ -52,7 +56,7 @@ export default class TodoEditor extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    let isEdit = nextProps.todo.dbKey !== -1;
+    let isEdit = nextProps.todo.text.length > 0;
     this.setState({isEdit: isEdit});
 
     if (isEdit === false) {
@@ -68,17 +72,17 @@ export default class TodoEditor extends Component {
     let todoText = this.text;
     // /* <form className={'todo-question'} dbKey='form-question'> */}
     let className = this.stateisEdit ?
-                    'todo-question-center' :
-                    'todo-question-bottom';
+                    'todo__question-center' :
+                    'todo__question-bottom';
     return (
-      <div className={'todo-question ' + className} >
+      <div className={'todo__question ' + className} >
         <TextEdit newTodo={(this.stateisEdit === false)}
                   disabled={isDisabled}
                   text={todoText}
                   placeholder="What should I do?"
                   onChange={::this.handleChangeText}
                   onSave={::this.handleSaveText}/>
-        <div className={'add-todo-button'} onClick={::this.handleClick}>
+        <div className={'todo__confirm-button'} onClick={::this.handleClick}>
           Confirm
         </div>
       </div>

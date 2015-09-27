@@ -1,12 +1,8 @@
-
-//import { Parse } from 'node-parse-api';
 import { Parse } from 'parse';
 
 let options = {
-  /*app_id: config.appId,   //eslint-disable-line
-  api_key: config.apiKey  //eslint-disable-line*/
-  appId: 'G8uut7RIyYCwCgAS7tioU4eZRqzHltm1bReq4o8X', //eslint-disable-line
-  apiKey: 'Lw3ZTfc2ER4kVh6zznDeXJfn1xphDFPgSYWGWVVz' //eslint-disable-line
+  appId: 'G8uut7RIyYCwCgAS7tioU4eZRqzHltm1bReq4o8X',
+  apiKey: 'Lw3ZTfc2ER4kVh6zznDeXJfn1xphDFPgSYWGWVVz'
 };
 
 let instance = null;
@@ -18,7 +14,6 @@ export default class ParseCOM {
       // initialize api with options
       Parse.initialize(options.appId, options.apiKey);
       this.parseAPI = Parse;
-      (options);
     }
     return instance;
   }
@@ -37,8 +32,8 @@ export default class ParseCOM {
       user.set('username', userData.username);
       user.set('password', userData.password);
       user.signUp(null, {
-        success: (user) => (resolve(user)),
-        error: (user, error) => (reject({ user, error }))
+        success: (username) => (resolve(username)),
+        error: (username, error) => (reject({ username, error }))
       });
     });
   }
@@ -48,9 +43,9 @@ export default class ParseCOM {
       let query = new this.parseAPI.Query(Parse.User);
       query.find({
         success: (users) => (resolve(users)),
-        error: (user, error) => (reject([]))
+        error: () => (reject([]))
       });
-    })
+    });
   }
 
   login(user, pass) {
@@ -58,17 +53,17 @@ export default class ParseCOM {
     return new Promise((resolve, reject) => {
       return self.parseAPI.Parse.User.logIn(user, pass, {
         success: (users) => (resolve(users)),
-        error: (user, error) => (reject([]))
-      })
-    })
+        error: () => (reject([]))
+      });
+    });
   }
 
-  logout(sessionToken) {
+  logout() {
     let self = this;
     return new Promise((resolve, reject) => {
       self.parseAPI.Parse.User.logOut()
       .then( (res) => {
-        console.log("logout:", res);
+        console.log('logout: ', res);
       });
       let currUser = self.parseAPI.Parse.User.current();
       if (!currUser) {
@@ -79,11 +74,69 @@ export default class ParseCOM {
     });
   }
 
-  update(obj, field, value) {
-    return this.parseAPI.update(obj, field, value)
+  loadTodos(username) {
+    let self = this;
+    return new Promise((resolve, reject) => {
+      let TodosObj = self.parseAPI.Object.extend('Todos');
+      let query = new self.parseAPI.Query(TodosObj);
+      query.equalTo('user', username);
+      query.find({
+        success: (todos) => {
+          console.log(todos);
+          return (resolve(todos));
+        },
+        error: (res) => {
+          console.log(res);
+          return (reject(res));
+        }
+      });
+    });
+  }
+
+  create(user, todosObj, field, value) {
+    console.log('API', field, value);
+    let self = this;
+    return new Promise((resolve, reject) => {
+      if (todosObj) {
+        return resolve(todosObj);
+      } else {
+        let TodosObj = self.parseAPI.Object.extend('Todos');
+        let todos = new TodosObj();
+        todos.set('user', user.username);
+        todos.set(field, value);
+        todos.save(null, {
+          success: (res) => {
+            resolve(res);
+          },
+          error: (res) => {
+            reject('Update error: ', res);
+          }
+        });
+      }
+    });
+  }
+
+  update(user, todosObj, field, value) {
+    return this.create(user, todosObj, field, value)
     .then(
-      success,
-      fail || () => {}
+      (resolvedTodoObj) => {
+        console.log('API');
+        return new Promise((resolve, reject) => {
+          resolvedTodoObj.set(field, value);
+          resolvedTodoObj.save(null, {
+            success: (res) => {
+              resolve('Update successful : ', res);
+            },
+            error: (res) => {
+              reject('Update error: ', res);
+            }
+          });
+        });
+      },
+      (err) => {
+        console.log("Can't create TODOS object !!!", err);
+      }
     );
   }
+
 }

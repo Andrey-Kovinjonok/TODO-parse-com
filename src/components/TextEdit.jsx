@@ -56,7 +56,7 @@ export default class TextEdit extends Component {
     /*const inputClass = classnames({ 'edit': this.props.editing,
                                     'todo-edit': this.props.newTodo});*/
     return (
-      <input className={'todo-edit'}
+      <input className={'todo__edit'}
              type='text'
              placeholder={this.props.placeholder}
              autoFocus='true'

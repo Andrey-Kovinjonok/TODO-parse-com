@@ -18,6 +18,15 @@ const createStoreWithMiddleware = applyMiddleware(
 
 const store = createStoreWithMiddleware(reducer);
 
+// Enable Webpack hot module replacement for reducers
+console.log('module.hot = ', module.hot);
+if (module.hot) {
+  module.hot.accept('./redux/Reducer.js', () => {
+    const nextRootReducer = require('./redux/Reducer.js');
+    store.replaceReducer(nextRootReducer);
+  });
+}
+
 const requireAuth = (nextState, replaceState) => {
   let state = store.getState();
   if ((!state.user) || (!state.user.sessionToken)) {

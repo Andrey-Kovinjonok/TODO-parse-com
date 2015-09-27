@@ -1,7 +1,15 @@
 
 export default store => next => action => {
   if (!action.promise) {
-    return next(action);
+    let actionResult = next(action);
+    if (action.postPromise) {
+      action.postPromise(store.getState())
+      .then(
+        (res) => console.log(res),
+        (err) => console.log(err)
+      );
+    }
+    return actionResult;
   } else {
     let { promise, onSuccess, onFail } = action;
 

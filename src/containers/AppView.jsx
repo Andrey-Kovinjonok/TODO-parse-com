@@ -4,81 +4,55 @@ import TodoItem from './../components/TodoItem.jsx';
 import TodoEditor from './../components/TodoEditor.jsx';
 
 import * as todoActions from './../redux/TodoActions.js';
-//import StoreExports from './../stores/TodoStore.jsx';
-//let { TodoStore, Actions } = StoreExports;
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
-@connect(state => ({ todoState: state.todos }))
 @connect(
-  state => ({ todoState: state.todos }),
-  dispatch => bindActionCreators(todoActions, dispatch)
+  state => ({
+    todos: state.todos,
+    editTodo: state.editTodo,
+    username: state.user.username }),
+  dispatch => bindActionCreators(todoActions, dispatch),
 )
 export default class AppView extends Component {
 
-  constructor(props, context) {
-    super(props, context);
-    /*this.state = {
-      todoItems: [],
-      editTodo: undefined
-    };*/
-    console.log('constructor:', props, context);
+  constructor(props) {
+    super(props);
   }
 
-  /*static propTypes = {
-    //friendsById: PropTypes.object.isRequired,
-    dispatch: PropTypes.func.isRequired
-  }*/
   static propTypes = {
-    todoState: PropTypes.array,
-    dispatch: PropTypes.func,
-    createTodo: PropTypes.func
+    todos: PropTypes.array,
+    username: PropTypes.string,
+    editTodo: PropTypes.object,
+    createTodo: PropTypes.func,
+    loadTodos: PropTypes.func,
+    dispatch: PropTypes.func
   }
 
   componentDidMount() {
-    const { createTodo } = this.props;
-    console.log('appview componentDidMounted: ', this);
-    createTodo('firstTodo');
-    console.log('senden action');
+    const { loadTodos, username } = this.props;
+    loadTodos(username);
   }
 
   componentWillReceiveProps(nextProps) {
     console.log('appview componentWillReceiveProps: ', nextProps);
   }
 
-  /*shouldComponentUpdate(prev, next) {
-    console.log('appview shouldComponentUpdate: ', prev, next);
-    return true;
-  }*/
-
-
   render() {
+    const { todos, editTodo } = this.props;
 
-    const { todoState, dispatch } = this.props;
-    console.log('props app view:', this.props);
-    //let {todoItems, editTodo} = this.state;
-
-    let actions = bindActionCreators(todoActions, dispatch);
-
-    let editTodo;
-    if (editTodo === undefined) {
-      editTodo = { dbKey: -1, text: '', index: -1 };
-    }
-
-    if (todoState.todos === undefined) {
+    if (todos === undefined) {
       return null;
     }
-    let items = todoState.todos.map( (todo, i) => {
+    let items = todos.map( (todo, i) => {
       let todoData = {
-        index: i,
-        text: todo.text,
-        dbKey: todo.dbKey
+        index: todo.index,
+        text: todo.text
       };
 
       return (<TodoItem key={i}
+                        listIndex={i}
                         todoData={todoData}
-                        //editItem={editTodo}
-                        actions={actions}
                         disabled={false}/>);
     });
 
@@ -89,7 +63,7 @@ export default class AppView extends Component {
           {items}
         </div>
 
-        <TodoEditor actions={actions} todo={editTodo} />
+        <TodoEditor todo={editTodo || { text: '', index: -1 }} />
       </div>
     );
   }
